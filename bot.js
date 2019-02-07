@@ -4,15 +4,9 @@ const ytdl = require('ytdl-core');
 const moment = require('moment');
 const request = require('request');
 const fs = require('fs');
-const getYoutubeID = require('get-youtube-id');
-const fetchVideoInfo = require('youtube-info');
-const yt_api_key = "AIzaSyDeoIH0u1e72AtfpwSKKOSy3IPp2UHzqi4";
 const Canvas = require("canvas");
 const jimp = require("jimp");
-let points = {}
 var prefix = "t!";
-const config = require('./config.json');
-let db = JSON.parse(fs.readFileSync("./database.json", "utf8"));
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -202,23 +196,83 @@ client.on('message', msg => {
 });
 
 
-client.on('message', message => {
-    if (message.author.bot) return;
-     if (message.content === prefix + "help") {
-     message.channel.send('**تم ارسال رسالة في الخاص**');
-
-
-
-
- message.author.sendMessage(`
-**
-\`\`\`
-Soon 
-\`\`\`
-**
- `);
-
+\\سو ملف أسمه
+\\Credits.json
+\\وحط فيه
+\\{}
+ 
+ 
+const pretty = require('pretty-ms'); // npm i pretty-ms
+const credits = require('./Credits.json');
+const creditsPath = './Credits.json';
+client.on('message',async message => {
+    if(message.author.bot || message.channel.type === 'dm') return;
+    let args = message.content.split(' ');
+    let author = message.author.id;
+    if(!credits[author]) credits[author] = { messages: 0, credits: 0, xp: 0, daily: 86400000 };
+    credits[author].messages += 1;
+    credits[author].xp += 1;
+    if(credits[author].xp === 5) {
+        credits[author].xp = 0;
+        credits[author].credits += 1;
+        fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 4));
     }
+    fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 4));
+ 
+   
+   if(args[0].toLowerCase() == `${prefix}credit` || args[0].toLowerCase() === `${prefix}credits`) {
+       let mention = message.mentions.users.first() || message.author;
+       let mentionn = message.mentions.users.first();
+       if(!credits[mention.id]) return message.channel.send(`**❎ |** Failed To Find the **Needed Data**.`);
+       if(!args[2]) {
+        let creditsEmbed = new Discord.RichEmbed()
+       .setColor("#36393e")
+       .setAuthor(mention.username, mention.avatarURL)
+       .setThumbnail(mention.avatarURL)
+       .addField(`❯ الكردت`, `» \`${credits[mention.id].credits} $\`\n`, true)
+       .addField(`❯ الرسائل`, `» \`${credits[mention.id].messages} 💬\``, true);
+       message.channel.send(creditsEmbed);
+       
+       } else if(mentionn && args[2]) {
+           if(isNaN(args[2])) return message.channel.send(`**❎ |** The **"Number"** You Entered **Isn't Correct**.`);
+         if(mentionn.id === message.author.id) return message.channel.send(`**❎ |** You Can't Give **Credits** To **Yourself**.`);
+           if(args[2] > credits[author].credits) return message.channel.send(`**❎ |** You don't have **Enough** credits to give to ${mentionn}`);
+         let first = Math.floor(Math.random() * 9);
+         let second = Math.floor(Math.random() * 9);
+         let third = Math.floor(Math.random() * 9);
+         let fourth = Math.floor(Math.random() * 9);
+         let num = `${first}${second}${third}${fourth}`;
+       
+         message.channel.send(`**🛡 |** **Type** \`${num}\` To **Complete** the transfer!`).then(m => {
+             message.channel.awaitMessages(r => r.author.id === message.author.id, { max: 1, time: 20000, errors:['time'] }).then(collected => {
+                 let c = collected.first();
+                 if(c.content === num) {
+                         message.channel.send(`**✅ |** Successfully **Transfered** \`$${args[2]}\` !`);
+                         m.delete();
+                         c.delete();
+                         credits[author].credits += (-args[2]);
+                         credits[mentionn.id].credits += (+args[2]);
+                         fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 4));
+                 } else {
+                         m.delete();
+                 }
+             });
+         });
+       
+     } else {
+         message.channel.send(`**❎ |** The **Syntax** should be like **\`${prefix}credits <Mention> [Ammount]\`**`);
+     }
+ } else if(args[0].toLowerCase() === `${prefix}daily`) {
+     if(credits[author].daily !== 86400000 && Date.now() - credits[author].daily !== 86400000) {
+         message.channel.send(`**❎ |** You already **Claimed** the daily ammount of credits since \`${pretty(Date.now() - credits[author].daily)}\`.`);
+     } else {
+         let ammount = getRandom(300, 500);
+         credits[author].daily = Date.now();
+         credits[author].credits += ammount;
+         fs.writeFileSync(creditsPath, JSON.stringify(credits, null, 4));
+         message.channel.send(`**✅ |** \`${ammount}\`, Successfully **Claimed** Your daily ammount of credits!`);
+     }
+ }
 });
 
 
@@ -226,39 +280,6 @@ Soon
 
 
 
-client.on("message", message => {
-    if (message.author.bot) return; 
-
-    if (!db[message.author.id]) db[message.author.id] = {
-        xp: 0,
-        level: 0
-      };
-    db[message.author.id].xp++;
-    let userInfo = db[message.author.id];
-    if(userInfo.xp > 100) {
-        userInfo.level++
-        userInfo.xp = 0
-        message.reply("Congratulations, you level up")
-    }
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    const cmd = args.shift().toLowerCase();
-    if(cmd === "info") {
-        let userInfo = db[message.author.id];
-        let member = message.mentions.members.first();
-        let embed = new Discord.RichEmbed()
-        .addField("Level", userInfo.level)
-        .addField("XP", userInfo.xp+"/100");
-        if(!member) return message.channel.sendEmbed(embed)
-        let memberInfo = db[member.id]
-        let embed2 = new Discord.RichEmbed()
-        .addField("Level", memberInfo.level)
-        .addField("XP", memberInfo.xp+"/100")
-        message.channel.sendEmbed(embed2)
-    }
-    fs.writeFile("./database.json", JSON.stringify(db), (x) => {
-        if (x) console.error(x)
-      });
-})
 
 client.on('message', message => { 
            if (message.content.startsWith(prefix + "user")) {
@@ -342,41 +363,7 @@ client.on('message',function(message) {
 });
 
 
-client.on('message', message => {
-    if (message.author.bot) return;
-     if (message.content === "t!inv") {
 
-
- message.author.sendMessage(`
-**بامكانك دعوة البوت من هنا
-\`\`\`
-https://discordapp.com/api/oauth2/authorize?client_id=533070826011099146&permissions=8&scope=bot
-\`\`\`
-**
-`);
-
-message.channel.send('```تم الارسال في الخاص```');
-
-    }
-});
-
-client.on('message', message => {
-    if (message.author.bot) return;
-     if (message.content === "t!support") {
-
-
- message.author.sendMessage(`
-**
-\`\`\`
-Server Support : https://discord.gg/hDeK9TP
-\`\`\`
-**
-`);
-
-message.channel.send('```تم الارسال في الخاص```');
-
-    }
-});
 
   client.on('message', (message) => {
     if (message.content.startsWith('t!kick')) {

@@ -63,8 +63,8 @@ const days = millis / 1000 / 60 / 60 / 24;
 let roles = client.guilds.get(message.guild.id).roles.map(r => r.name);
 var embed  = new Discord.RichEmbed()
 .setAuthor(message.guild.name, message.guild.iconURL)
-.addField("``Server ID``", message.guild.id,true)
-.addField("``Created On``", message.guild.createdAt.toLocaleString(),true)
+.addField("``Server ID``",  message.guild.id,true )
+.addField("``Created On``",  message.guild.createdAt.toLocaleString(),true )
 .addField("``Owned by``",`${message.guild.owner.user.username}#${message.guild.owner.user.discriminator}`)
 .addField("``Members``",`[${message.guild.memberCount}]`,true)
 .addField('``Channels``',`**${message.guild.channels.filter(m => m.type === 'text').size}**` + ' text | Voice  '+ `**${message.guild.channels.filter(m => m.type === 'voice').size}** `,true)
@@ -74,6 +74,63 @@ message.channel.sendEmbed(embed)
 
 }
 });
+
+client.on('message', message => {
+    if (message.author.bot) return;
+     if (message.content === prefix + "help") {
+     message.channel.send('```تم ارسال رسالة في الخاص```');
+
+
+
+
+ message.author.sendMessage(`
+**
+\`\`\`
+Soon 
+\`\`\`
+
+**
+ `);
+
+    }
+});
+client.on('message', message => {
+    if (message.author.bot) return;
+     if (message.content === "t!inv") {
+
+
+ message.author.sendMessage(`
+
+**بامكانك دعوة البوت من هنا
+\`\`\`
+https://discordapp.com/api/oauth2/authorize?client_id=533070826011099146&permissions=8&scope=bot
+\`\`\`
+**
+`);
+
+message.channel.send('```تم الارسال في الخاص```');
+
+    }
+});
+
+client.on('message', message => {
+    if (message.author.bot) return;
+     if (message.content === "t!support") {
+
+
+ message.author.sendMessage(`
+**
+\`\`\`
+Server Support : https://discord.gg/hDeK9TP
+\`\`\`
+**
+`);
+
+message.channel.send('```تم الارسال في الخاص```');
+
+    }
+});
+
 
 client.on('message', message => {
 if(!message.channel.guild) return;

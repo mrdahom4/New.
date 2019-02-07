@@ -196,12 +196,7 @@ client.on('message', msg => {
 });
 
 
-\\سو ملف أسمه
-\\Credits.json
-\\وحط فيه
-\\{}
- 
- 
+
 const pretty = require('pretty-ms'); // npm i pretty-ms
 const credits = require('./Credits.json');
 const creditsPath = './Credits.json';

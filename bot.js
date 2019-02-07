@@ -226,11 +226,9 @@ client.on('message',async message => {
        if(!credits[mention.id]) return message.channel.send(`**❎ |** Failed To Find the **Needed Data**.`);
        if(!args[2]) {
         let creditsEmbed = new Discord.RichEmbed()
-       .setColor("#36393e")
        .setAuthor(mention.username, mention.avatarURL)
        .setThumbnail(mention.avatarURL)
        .addField(`❯ الكردت`, `» \`${credits[mention.id].credits} $\`\n`, true)
-       .addField(`❯ الرسائل`, `» \`${credits[mention.id].messages} 💬\``, true);
        message.channel.send(creditsEmbed);
        
        } else if(mentionn && args[2]) {
@@ -243,7 +241,7 @@ client.on('message',async message => {
          let fourth = Math.floor(Math.random() * 9);
          let num = `${first}${second}${third}${fourth}`;
        
-         message.channel.send(`**🛡 |** **Type** \`${num}\` To **Complete** the transfer!`).then(m => {
+         message.channel.send(`**Type** \`${num}\` To **Complete** the transfer!`).then(m => {
              message.channel.awaitMessages(r => r.author.id === message.author.id, { max: 1, time: 20000, errors:['time'] }).then(collected => {
                  let c = collected.first();
                  if(c.content === num) {
